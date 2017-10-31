@@ -130,11 +130,11 @@ This security group allows both web-based and SSH-based traffic through to the M
 }
 ```
 
-#### Allow Web
+#### Allow App Traffic
 
 **Documentation Reference:** https://docs.microsoft.com/en-us/azure/templates/microsoft.network/networksecuritygroups/securityrules
 
-This security group allows application traffic. The `.properties.securityRules[].properties.destinationAddressPrefix` values can be locked down further with this format: `1.1.1.1/32`.
+This security group allows application traffic, and is used for the ERT deployment network. The `.properties.securityRules[].properties.destinationAddressPrefix` values can be locked down further with this format: `1.1.1.1/32`.
 
 ```json
 {
