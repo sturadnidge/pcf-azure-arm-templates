@@ -124,7 +124,7 @@
       }
     },
     {
-      "name": "AllowWeb",
+      "name": "AllowAppTraffic",
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2017-03-01",
       "location": "[parameters('location')]",
@@ -142,7 +142,7 @@
               "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "*",
               "access": "Allow",
-              "priority": 1100,
+              "priority": 1000,
               "direction": "Inbound"
             },
             "name": "Allow-HTTP"
@@ -156,10 +156,24 @@
               "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "*",
               "access": "Allow",
-              "priority": 1000,
+              "priority": 1100,
               "direction": "Inbound"
             },
             "name": "Allow-HTTPS"
+          },
+          {
+            "properties": {
+              "description": "Allow Inbound CF SSH",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "2222",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1200,
+              "direction": "Inbound"
+            },
+            "name": "Allow-CF-SSH"
           }
         ]
       }
@@ -196,7 +210,7 @@
             "properties": {
               "addressPrefix": "10.0.8.0/22",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowWeb')]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowAppTraffic')]"
               }
             }
           },
@@ -205,7 +219,7 @@
             "properties": {
               "addressPrefix": "10.0.12.0/22",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowWeb')]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowAppTraffic')]"
               }
             }
           }

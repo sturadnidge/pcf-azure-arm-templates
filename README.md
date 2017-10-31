@@ -1,6 +1,6 @@
 # PCF Azure Resource Manager (ARM) Templates
 
-This repo contains ARM templates that help operators deploy Ops Manager Director for Pivotal Cloud Foundry (PCF). 
+This repo contains ARM templates that help operators deploy Ops Manager Director for Pivotal Cloud Foundry (PCF).
 
 For more information on installing Pivotal Cloud Foundry, see the [Launching an Ops Manager Director Instance with an ARM Template](https://docs.pivotal.io/pivotalcf/customizing/azure-arm-template.html) topic.
 
@@ -134,11 +134,11 @@ This security group allows both web-based and SSH-based traffic through to the M
 
 **Documentation Reference:** https://docs.microsoft.com/en-us/azure/templates/microsoft.network/networksecuritygroups/securityrules
 
-This security group allows web-based traffic. The `.properties.securityRules[].properties.destinationAddressPrefix` values can be locked down further with this format: `1.1.1.1/32`.
+This security group allows application traffic. The `.properties.securityRules[].properties.destinationAddressPrefix` values can be locked down further with this format: `1.1.1.1/32`.
 
 ```json
 {
-  "name": "AllowWeb",
+  "name": "AllowAppTraffic",
   "type": "Microsoft.Network/networkSecurityGroups",
   "apiVersion": "2017-03-01",
   "location": "[parameters('location')]",
@@ -156,7 +156,7 @@ This security group allows web-based traffic. The `.properties.securityRules[].p
           "sourceAddressPrefix": "*",
           "destinationAddressPrefix": "*",
           "access": "Allow",
-          "priority": 1100,
+          "priority": 1000,
           "direction": "Inbound"
         },
         "name": "Allow-HTTP"
@@ -170,10 +170,24 @@ This security group allows web-based traffic. The `.properties.securityRules[].p
           "sourceAddressPrefix": "*",
           "destinationAddressPrefix": "*",
           "access": "Allow",
-          "priority": 1000,
+          "priority": 1100,
           "direction": "Inbound"
         },
         "name": "Allow-HTTPS"
+      },
+      {
+        "properties": {
+          "description": "Allow Inbound CF SSH",
+          "protocol": "TCP",
+          "sourcePortRange": "*",
+          "destinationPortRange": "2222",
+          "sourceAddressPrefix": "*",
+          "destinationAddressPrefix": "*",
+          "access": "Allow",
+          "priority": 1200,
+          "direction": "Inbound"
+        },
+        "name": "Allow-CF-SSH"
       }
     ]
   }
@@ -210,7 +224,7 @@ This is the virtual network configuration for PCF. It contains one top-level cla
         "properties": {
           "addressPrefix": "10.0.4.0/22",
           "networkSecurityGroup": {
-            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowWeb')]"
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowWebAndSSH')]"
           }
         }
       },
@@ -219,7 +233,7 @@ This is the virtual network configuration for PCF. It contains one top-level cla
         "properties": {
           "addressPrefix": "10.0.8.0/22",
           "networkSecurityGroup": {
-            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowWeb')]"
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowAppTraffic')]"
           }
         }
       },
@@ -228,7 +242,7 @@ This is the virtual network configuration for PCF. It contains one top-level cla
         "properties": {
           "addressPrefix": "10.0.12.0/22",
           "networkSecurityGroup": {
-            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowWeb')]"
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AllowAppTraffic')]"
           }
         }
       }
@@ -512,6 +526,6 @@ This is the virtual machine configuration for OpsManager. It is connected to the
 
 You will need these environment variables:
 
-1. `AZURE_DEFAULT_LOCATION` -> I have "West US", but it can be any supported region. 
+1. `AZURE_DEFAULT_LOCATION` -> I have "West US", but it can be any supported region.
 1. `AZURE_SUBSCRIPTION_NAME` -> Your Azure subscription name. You can get this with `(Get-AzureRmSubscription).SubscriptionName` in PowerShell.
 1. `OpsManURI` -> You can get this from downloading the OpsMan release off the Pivotal Network.
